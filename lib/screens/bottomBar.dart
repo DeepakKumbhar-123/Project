@@ -1,5 +1,6 @@
 // import 'package:analyzebuddy/screens/homePage.dart';
 // import 'package:analyzebuddy/screens/userProfile.dart';
+import 'package:alertify/screens/homePage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:analyzebuddy/src/constants/colors.dart';
@@ -17,7 +18,7 @@ class _appBottomState extends State<appBottom> {
 
   static final List<Widget> _WidgetsOptions = <Widget>[
     // HomeScreen(),
-    const Text("Home"),
+    HomePage(),
 
     const Text("Biller"),
     const Text("Data"),
