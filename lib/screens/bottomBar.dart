@@ -1,3 +1,4 @@
+import 'package:alertify/screens/Chatting.dart';
 import 'package:alertify/screens/UserProfile.dart';
 import 'package:alertify/screens/addIndident.dart';
 import 'package:flutter/material.dart';
@@ -52,11 +53,11 @@ class _appBottomState extends State<appBottom> {
                   ),
                   child: InkWell(
                       onTap: (){
-                        // Navigator.of(context).push(
-                        //   MaterialPageRoute(
-                        //     builder: (context) =>  // Replace with your next screen widget
-                        //   ),
-                        // );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => Chatting(users: widget.users,) // Replace with your next screen widget
+                          ),
+                        );
                       },
                       child: Icon(Icons.mark_unread_chat_alt,color: Colors.white,))),
               SizedBox(width: 10,),
