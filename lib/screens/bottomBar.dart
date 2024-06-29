@@ -20,9 +20,7 @@ class _appBottomState extends State<appBottom> {
     super.initState();
     _widgetsOptions = <Widget>[
       HomePage(users: widget.users), // Pass users data to HomePage
-      const Text("Biller"),
       AddIncident(users: widget.users),
-      const Text("Repo"),
       const Text("Profile"),
     ];
   }
@@ -52,20 +50,12 @@ class _appBottomState extends State<appBottom> {
             activeIcon: Icon(Icons.home),
             label: "Home",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.money),
-            activeIcon: Icon(Icons.money),
-            label: "Biller",
-          ),BottomNavigationBarItem(
+         BottomNavigationBarItem(
             icon: Icon(Icons.add),
             activeIcon: Icon(Icons.add),
             label: "ReportIncident",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.data_usage),
-            activeIcon: Icon(Icons.data_usage),
-            label: "Data",
-          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             activeIcon: Icon(Icons.person),

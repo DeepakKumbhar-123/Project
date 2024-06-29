@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class AddIncident extends StatefulWidget {
   final Map<dynamic, dynamic> users;
 
-
-  const AddIncident({Key? key, required this.users});
+  const AddIncident({Key? key, required this.users}) : super(key: key);
 
   @override
   State<AddIncident> createState() => _AddIncidentState();
@@ -14,6 +14,9 @@ class _AddIncidentState extends State<AddIncident> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
+
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -21,6 +24,58 @@ class _AddIncidentState extends State<AddIncident> {
     _typeController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  Future<void> reportIncident() async {
+    if (_nameController.text.isEmpty ||
+        _typeController.text.isEmpty ||
+        _locationController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all fields'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String incidentName = _nameController.text;
+      String incidentType = _typeController.text;
+      String incidentLocation = _locationController.text;
+var mobileNumber= widget.users['Mobile Number'];
+      await _database.child('incidents').child(mobileNumber).set({
+        'name': incidentName,
+        'type': incidentType,
+        'location': incidentLocation,
+        'reportedBy': widget.users['Name'],
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Incident reported successfully!'),
+        ),
+      );
+
+      // Clear the form fields after submission
+      _nameController.clear();
+      _typeController.clear();
+      _locationController.clear();
+    } catch (error) {
+      print('Error reporting incident: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error reporting incident. Please try again.'),
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -34,9 +89,14 @@ class _AddIncidentState extends State<AddIncident> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(widget.users['Name']),
+              const Text(
+                'Report Incident',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 20),
+              Text('Name: ${widget.users['Name']}'),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -50,7 +110,7 @@ class _AddIncidentState extends State<AddIncident> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _typeController,
                 decoration: const InputDecoration(
@@ -64,7 +124,7 @@ class _AddIncidentState extends State<AddIncident> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _locationController,
                 decoration: const InputDecoration(
@@ -78,42 +138,19 @@ class _AddIncidentState extends State<AddIncident> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Validate the form inputs
-                  if (_nameController.text.isEmpty ||
-                      _typeController.text.isEmpty ||
-                      _locationController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please fill all fields'),
-                      ),
-                    );
-                  } else {
-                    // Process the incident report logic here
-                    String incidentName = _nameController.text;
-                    String incidentType = _typeController.text;
-                    String incidentLocation = _locationController.text;
-
-                    // Print or process the data as needed
-                    print('Incident Name: $incidentName');
-                    print('Incident Type: $incidentType');
-                    print('Incident Location: $incidentLocation');
-
-                    // Optionally, you can clear the form fields after submission
-                    _nameController.clear();
-                    _typeController.clear();
-                    _locationController.clear();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Incident reported successfully!'),
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Report Incident'),
+                onPressed: isLoading ? null : reportIncident,
+                child: isLoading
+                    ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Text('Report Incident'),
               ),
             ],
           ),
