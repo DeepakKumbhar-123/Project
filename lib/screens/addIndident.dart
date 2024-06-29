@@ -90,11 +90,11 @@ var mobileNumber= widget.users['Mobile Number'];
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
-                'Report Incident',
+                '🚨 Report Incident 🚨',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 20),
-              Text('Name: ${widget.users['Name']}'),
+              Text('👨‍💼 Reported By: ${widget.users['Name']}'),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(

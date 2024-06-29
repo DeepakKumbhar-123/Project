@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hello $userName"),
+        title: Text("Hello $userName 👋️ ",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 25),),
       ),
       body: _incidents.isEmpty
           ? Center(child: CircularProgressIndicator())

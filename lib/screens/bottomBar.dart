@@ -1,3 +1,4 @@
+import 'package:alertify/screens/UserProfile.dart';
 import 'package:alertify/screens/addIndident.dart';
 import 'package:flutter/material.dart';
 import 'package:alertify/screens/homePage.dart';
@@ -21,7 +22,7 @@ class _appBottomState extends State<appBottom> {
     _widgetsOptions = <Widget>[
       HomePage(users: widget.users), // Pass users data to HomePage
       AddIncident(users: widget.users),
-      const Text("Profile"),
+      UserProfile(users: widget.users),
     ];
   }
 
@@ -35,27 +36,48 @@ class _appBottomState extends State<appBottom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text("Alertify"),
-            SizedBox(width: 180,),
-            Container(
-              height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: Colors.red,
-                ),
-                child: InkWell(
-                  onTap: (){
-                    // Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (context) =>  // Replace with your next screen widget
-                    //   ),
-                    // );
-                  },
-                    child: Icon(Icons.call_end,color: Colors.white,))),
-          ],
+        backgroundColor: Colors.blue.shade200,
+        title: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Text("Alertify"),
+              SizedBox(width: 120,),
+              Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: Colors.green,
+                  ),
+                  child: InkWell(
+                      onTap: (){
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) =>  // Replace with your next screen widget
+                        //   ),
+                        // );
+                      },
+                      child: Icon(Icons.mark_unread_chat_alt,color: Colors.white,))),
+              SizedBox(width: 10,),
+              Container(
+                height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: Colors.red,
+                  ),
+                  child: InkWell(
+                    onTap: (){
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>  // Replace with your next screen widget
+                      //   ),
+                      // );
+                    },
+                      child: Icon(Icons.call_end,color: Colors.white,))),
+            ],
+          ),
         ),
       ),
       body: Center(child: _widgetsOptions[selectedPageIndex]),
