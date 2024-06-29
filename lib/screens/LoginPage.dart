@@ -1,146 +1,174 @@
+import 'package:alertify/screens/RegistrationPage.dart';
+import 'package:alertify/screens/bottomBar.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:alertify/screens/homePage.dart';
 
-class UserLogin extends StatelessWidget {
-  final mobileController = TextEditingController();
-  final passwordController = TextEditingController();
-  final ValueNotifier<bool> passToggle = ValueNotifier<bool>(true);
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
-  UserLogin({super.key});
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final DatabaseReference _database = FirebaseDatabase.instance.reference();
+  List<Map<dynamic, dynamic>> _usersList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers();
+  }
+
+  void _fetchUsers() {
+    _database.child('users').onValue.listen((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>;
+      final List<Map<dynamic, dynamic>> users = [];
+      data.forEach((key, value) {
+        users.add({
+          'username': key,
+          ...value,
+        });
+      });
+      setState(() {
+        _usersList = users;
+      });
+    });
+  }
+
+  void loginUser() {
+    if (_formKey.currentState!.validate()) {
+      String username = usernameController.text;
+      String password = passwordController.text;
+
+      // Find user in _usersList
+      var user = _usersList.firstWhere(
+            (user) => user['Mobile Number'] == username && user['password'] == password,
+        orElse: null,
+      );
+
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login Successful'),
+          ),
+        );
+
+        // Navigate to the next screen after successful login
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => appBottom(users: user,), // Replace with your next screen widget
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username or password'),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
-    mobileController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
-    passToggle.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: size.height * 0.1),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.person, size: 75.0),
-                ],
-              ),
-              SizedBox(height: size.height * 0.02),
-              const Text(
-                'LOGIN',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 60,
-                  color: Colors.black,
-                ),
-              ),
-              const Text(
-                'Please use accurate credentials',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-              Form(
-                child: Column(
-                  children: [
-                    SizedBox(height: size.height * 0.05),
-                    TextFormField(
-                      keyboardType: TextInputType.phone,
-                      controller: mobileController,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.phone),
-                        labelText: 'Mobile Number',
-                        hintText: 'Enter your mobile number',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: size.height * 0.03),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: passToggle,
-                      builder: (context, isObscured, child) {
-                        return TextFormField(
-                          obscureText: isObscured,
-                          keyboardType: TextInputType.visiblePassword,
-                          controller: passwordController,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            labelText: 'Password',
-                            hintText: 'Enter your password',
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(isObscured ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () {
-                                passToggle.value = !isObscured;
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: size.height * 0.03),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: InkWell(
-                        onTap: () {},
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(fontSize: 16, color: Colors.blue),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: size.height * 0.1),
-                    SizedBox(
-                      width: size.width * 0.5,
-                      height: size.height * 0.07,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _handleUserSignIn(context);
-                        },
-                        child: const Text('LOGIN'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              Icon(Icons.person),
+              SizedBox(width: 25,),
+              Text('Login'),
             ],
           ),
         ),
-      ),
-    );
-  }
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Center(
+            child: Container(
+              height: size.height,
+              width: size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 40,),
+                        TextFormField(
+                          controller: usernameController,
+                          decoration: const InputDecoration(labelText: 'Username'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a username';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 25),
+                        TextFormField(
+                          controller: passwordController,
+                          decoration: const InputDecoration(labelText: 'Password'),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a password';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 50),
+                        ElevatedButton(
+                          onPressed: loginUser,
+                          child: const Text('Login'),
+                        ),
+                        SizedBox(height: 30,),
+                        Row(
+                          children: [
+                            Text("Don't have an Account ? "),
+                            InkWell(
+                              onTap: (){
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute<LoginPage>(
+                                    builder: (BuildContext context) {
+                                      return RegPage(); // Replace with your LoginPage route
+                                    },
+                                  ),
+                                );
+                              },
+                                child: Text("SigiUp"))
+                          ],
+                        ),
 
-  void _handleUserSignIn(BuildContext context) {
-    // Navigate to User Home Page
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => UserHomePage(),
-      ),
-    );
-  }
-}
-
-class UserHomePage extends StatelessWidget {
-  const UserHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Home Page'),
-      ),
-      body: const Center(
-        child: Text('Welcome to User Home Page'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

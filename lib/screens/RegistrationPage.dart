@@ -1,166 +1,186 @@
-
 import 'package:flutter/material.dart';
-// import 'package:firebase_database/firebase_database.dart';
-// import 'package:my_app/regDone.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-class Registration extends StatefulWidget {
+import 'LoginPage.dart'; // Replace with your actual LoginPage import
+
+class RegPage extends StatefulWidget {
+  const RegPage({Key? key}) : super(key: key);
+
   @override
-  _RegistrationState createState() => _RegistrationState();
+  State<RegPage> createState() => _RegPageState();
 }
 
-class _RegistrationState extends State<Registration> {
-  int currentStep = 0;
-  bool isLoading = false;
+class _RegPageState extends State<RegPage> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController mobileController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
-  // final databaseRef = FirebaseDatabase.instance.ref('Users');
+  bool _isRegistering = false; // State variable for tracking registration progress
 
-  Future<void> registerUser() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    // Simulate registration process
-    await Future.delayed(Duration(seconds: 2));
-
-    // Navigate to registration done page
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => RegDone()),
-    // );
-
-    setState(() {
-      isLoading = false;
-    });
+  @override
+  void dispose() {
+    nameController.dispose();
+    mobileController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
   }
 
-  List<Step> stepList() => [
-    Step(
-      isActive: currentStep >= 0,
-      title: const Text('Personal Info'),
-      content: Column(
-        children: [
-          TextField(
-            controller: firstNameController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'First Name',
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: lastNameController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Last Name',
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: mobileController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Mobile Number',
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: passwordController,
-            obscureText: true,
-            keyboardType: TextInputType.visiblePassword,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: confirmPasswordController,
-            obscureText: true,
-            keyboardType: TextInputType.visiblePassword,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Confirm Password',
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (firstNameController.text.isEmpty ||
-                  lastNameController.text.isEmpty ||
-                  mobileController.text.isEmpty ||
-                  passwordController.text.isEmpty ||
-                  confirmPasswordController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill all fields correctly'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                return;
-              }
+  Future<void> registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isRegistering = true; // Start showing progress indicator
+      });
 
-              if (passwordController.text != confirmPasswordController.text) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Passwords do not match'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                return;
-              }
+      try {
+        String mobileNumber = mobileController.text;
+        await _database.child('users').child(mobileNumber).set({
+          'Name': nameController.text.toUpperCase(),
+          'Mobile Number': mobileController.text,
+          'password': passwordController.text,
+          // Add more fields as needed
+        });
 
-              if (!isLoading) {
-                registerUser();
-              }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User registered successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<LoginPage>(
+            builder: (BuildContext context) {
+              return LoginPage(); // Replace with your LoginPage route
             },
-            child: isLoading
-                ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            )
-                : const Text('Submit'),
           ),
-        ],
-      ),
-    ),
-  ];
+        );
+        // Optionally, navigate to the next screen or show a success message
+      } catch (error) {
+        print('Error registering user: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error registering user. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } finally {
+        setState(() {
+          _isRegistering = false; // Hide progress indicator
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Registration"),
-      ),
-      body: Stepper(
-        type: StepperType.vertical,
-        steps: stepList(),
-        currentStep: currentStep,
-        onStepContinue: () {
-          final isLastStep = currentStep == stepList().length - 1;
-          if (isLastStep) {
-            print('COMPLETED');
-          } else {
-            setState(() => currentStep += 1);
-          }
-        },
-        onStepCancel: () {
-          if (currentStep > 0) {
-            setState(() => currentStep -= 1);
-          }
-        },
+    var size = MediaQuery.of(context).size;
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Register Here'),
+        ),
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Center(
+            child: Container(
+              height: size.height,
+              width: size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(labelText: 'Name'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: mobileController,
+                        decoration: const InputDecoration(
+                            labelText: 'Mobile Number'),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your mobile number';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: const InputDecoration(labelText: 'Password'),
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: confirmPasswordController,
+                        decoration: const InputDecoration(
+                            labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 25),
+                      _isRegistering
+                          ? CircularProgressIndicator() // Show progress indicator
+                          : ElevatedButton(
+                        onPressed: registerUser,
+                        child: const Text('Register'),
+                      ),
+                      SizedBox(height: 20,),
+                      Row(
+                        children: [
+                          Text("Already have an Account ? "),
+                          InkWell(
+                              onTap: (){
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute<LoginPage>(
+                                    builder: (BuildContext context) {
+                                      return LoginPage(); // Replace with your LoginPage route
+                                    },
+                                  ),
+                                );
+                              },
+                              child: Text("Login"))
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
