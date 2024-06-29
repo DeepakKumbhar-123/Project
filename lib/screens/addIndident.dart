@@ -47,7 +47,7 @@ class _AddIncidentState extends State<AddIncident> {
       String incidentType = _typeController.text;
       String incidentLocation = _locationController.text;
 var mobileNumber= widget.users['Mobile Number'];
-      await _database.child('incidents').child(mobileNumber).set({
+      await _database.child('incidents').child(mobileNumber+incidentName).set({
         'name': incidentName,
         'type': incidentType,
         'location': incidentLocation,
@@ -81,9 +81,7 @@ var mobileNumber= widget.users['Mobile Number'];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Report Incident'),
-      ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(

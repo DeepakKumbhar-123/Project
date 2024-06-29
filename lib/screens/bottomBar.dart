@@ -35,7 +35,28 @@ class _appBottomState extends State<appBottom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Alertify"),
+        title: Row(
+          children: [
+            Text("Alertify"),
+            SizedBox(width: 180,),
+            Container(
+              height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Colors.red,
+                ),
+                child: InkWell(
+                  onTap: (){
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (context) =>  // Replace with your next screen widget
+                    //   ),
+                    // );
+                  },
+                    child: Icon(Icons.call_end,color: Colors.white,))),
+          ],
+        ),
       ),
       body: Center(child: _widgetsOptions[selectedPageIndex]),
       bottomNavigationBar: BottomNavigationBar(
