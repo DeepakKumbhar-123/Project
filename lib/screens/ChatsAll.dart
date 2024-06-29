@@ -26,6 +26,9 @@ class _ChatsAllState extends State<ChatsAll> {
         Map<dynamic, dynamic> chatsMap = event.snapshot.value as Map<dynamic, dynamic>;
         List<Map<dynamic, dynamic>> chatsList = chatsMap.entries.map((e) => e.value as Map<dynamic, dynamic>).toList();
 
+        // Sort chats by timestamp in descending order
+        chatsList.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+
         setState(() {
           _chats = chatsList;
         });
