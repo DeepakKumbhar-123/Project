@@ -1,4 +1,5 @@
 import 'package:alertify/screens/Chatting.dart';
+import 'package:alertify/screens/EmergencyContacts.dart';
 import 'package:alertify/screens/UserProfile.dart';
 import 'package:alertify/screens/addIndident.dart';
 import 'package:flutter/material.dart';
@@ -70,11 +71,11 @@ class _appBottomState extends State<appBottom> {
                   ),
                   child: InkWell(
                     onTap: (){
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //     builder: (context) =>  // Replace with your next screen widget
-                      //   ),
-                      // );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>  EmergencyContactsPage()
+                        ),
+                      );
                     },
                       child: Icon(Icons.call_end,color: Colors.white,))),
             ],
